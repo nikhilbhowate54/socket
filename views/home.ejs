@@ -1,0 +1,49 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hello world</title>
+  </head>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    let socket = io();
+    // allow you to emit coustom events on the server and client
+    function setUsername() {
+      socket.emit("setUsername", document.getElementById("name").value);
+    }
+    let user;
+    socket.on("userExists", (data) => {
+      document.getElementById("error-container").innerHTML = data;
+    });
+    socket.on("userSet", (data) => {
+      user = data.username;
+      document.body.innerHTML =
+        '<input type="text" id="message">\
+        <button type="button" name="button" onclick="sendMessage()">send</button>\
+        <div id="message-container"></div>';
+    });
+    function sendMessage() {
+      let msg = document.getElementById("message").value;
+      if (msg) {
+        socket.emit("msg", { message: msg, user: user });
+      }
+    }
+    socket.on("newmsg", (data) => {
+      if (user) {
+        document.getElementById("message-container").innerHTML +=
+          "<div><b>" + data.user + "</b>:->" +data.message+ "</div>";
+      }
+    });
+  </script>
+  <body>
+    <div id="error-container"></div>
+    <input
+      id="name"
+      type="text"
+      placeholder=" enter your name"
+      value=" "
+      type="text"
+    />
+    <button type="button" onclick="setUsername()">let's us chat</button>
+  </body>
+</html>
